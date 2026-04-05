@@ -9,12 +9,26 @@
   <p>Real moments, real memories &mdash; told in Ted &amp; Linda's own words.</p>
 </section>
 
+{% if tags %}
+<div class="tag-filters" role="navigation" aria-label="Filter by category">
+  <button class="tag-filter tag-filter--active" data-tag="all">All</button>
+  {% for tag in tags %}
+  <button class="tag-filter" data-tag="{{ tag }}">{{ tag | title }}</button>
+  {% endfor %}
+</div>
+{% endif %}
+
 {% if stories %}
-<div class="stories-grid">
+<div class="stories-grid" id="stories-grid">
   {% for s in stories %}
-  <article class="story-card">
+  <article class="story-card" data-tags="{{ s.tags | join(',') }}">
     <div class="story-card__meta">
       <span class="story-card__wordcount">{{ s.word_count }} words</span>
+      {% if s.tags %}
+      <span class="story-card__tags">
+        {% for tag in s.tags %}<span class="story-tag">{{ tag | title }}</span>{% endfor %}
+      </span>
+      {% endif %}
     </div>
     <h2 class="story-card__title">{{ s.title }}</h2>
     {% if s.preview %}
@@ -26,6 +40,34 @@
   </article>
   {% endfor %}
 </div>
+
+<p class="no-results" id="no-results" style="display:none">
+  No stories in that category yet.
+</p>
+
+<script>
+  const filters  = document.querySelectorAll('.tag-filter');
+  const cards    = document.querySelectorAll('.story-card');
+  const noResult = document.getElementById('no-results');
+
+  filters.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filters.forEach(b => b.classList.remove('tag-filter--active'));
+      btn.classList.add('tag-filter--active');
+
+      const tag = btn.dataset.tag;
+      let visible = 0;
+      cards.forEach(card => {
+        const tags = card.dataset.tags ? card.dataset.tags.split(',') : [];
+        const show = tag === 'all' || tags.includes(tag);
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      noResult.style.display = visible === 0 ? '' : 'none';
+    });
+  });
+</script>
+
 {% else %}
 <p class="empty-state">No stories yet &mdash; check back soon.</p>
 {% endif %}

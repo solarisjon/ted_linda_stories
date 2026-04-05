@@ -49,6 +49,11 @@
         required
       ></textarea>
 
+      <label class="admin-form__label" for="tags">Categories <span class="admin-form__optional">(optional)</span></label>
+      <p class="admin-form__hint">Comma-separated, e.g. travel, humor, family</p>
+      <input class="admin-form__input" type="text" id="tags" name="tags"
+             placeholder="travel, humor, family" />
+
       <div class="admin-form__actions">
         <button class="admin-form__submit" type="submit">Publish Story</button>
       </div>
@@ -64,7 +69,10 @@
       <li class="admin-story-item">
         <div class="admin-story-item__info">
           <span class="admin-story-item__title">{{ s.title }}</span>
-          <span class="admin-story-item__meta">{{ s.word_count }} words &middot; {{ s.slug }}</span>
+          <span class="admin-story-item__meta">
+            {{ s.word_count }} words &middot; {{ s.slug }}
+            {% if s.tags %}&middot; {{ s.tags | join(', ') }}{% endif %}
+          </span>
         </div>
         <div class="admin-story-item__actions">
           <a href="{{ url_for('story', slug=s.slug) }}" class="admin-btn admin-btn--view" target="_blank">View</a>

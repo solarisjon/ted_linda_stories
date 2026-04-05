@@ -17,6 +17,13 @@
       <span class="site-brand__ornament">&curren;</span>
     </a>
     <p class="site-brand__tagline">A family collection of memories &amp; adventures</p>
+    <form class="site-search" action="/search" method="get" role="search">
+      <input class="site-search__input" type="search" name="q"
+             placeholder="Search stories…"
+             value="{{ request.args.get('q', '') }}"
+             aria-label="Search stories" />
+      <button class="site-search__btn" type="submit" aria-label="Search">&#x2315;</button>
+    </form>
   </header>
 
   <main>

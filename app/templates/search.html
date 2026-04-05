@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if query %}Search: {{ query }}{% else %}Search{% endif %} — Ted &amp; Linda's Stories
+{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+  <h1>Search</h1>
+  <div class="ornament-divider"><span>&mdash;&nbsp;&loz;&nbsp;&mdash;</span></div>
+</section>
+
+<form class="search-form" action="/search" method="get" role="search">
+  <input class="admin-form__input search-form__input" type="search" name="q"
+         value="{{ query }}" placeholder="Search stories…" autofocus aria-label="Search" />
+  <button class="admin-form__submit" type="submit">Search</button>
+</form>
+
+{% if query %}
+  {% if results %}
+  <p class="search-count">
+    {{ results | length }} result{{ 's' if results | length != 1 }} for
+    <strong>&ldquo;{{ query }}&rdquo;</strong>
+  </p>
+  <div class="stories-grid">
+    {% for s in results %}
+    <article class="story-card">
+      <div class="story-card__meta">
+        <span class="story-card__wordcount">{{ s.word_count }} words</span>
+        {% if s.tags %}
+        <span class="story-card__tags">
+          {% for tag in s.tags %}<span class="story-tag">{{ tag | title }}</span>{% endfor %}
+        </span>
+        {% endif %}
+      </div>
+      <h2 class="story-card__title">{{ s.title }}</h2>
+      <p class="story-card__preview">{{ s.snippet }}</p>
+      <a href="{{ url_for('story', slug=s.slug) }}" class="read-link">
+        Read the story <span class="read-link__arrow">&rarr;</span>
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">
+    No stories matched &ldquo;{{ query }}&rdquo;. Try a different word or phrase.
+  </p>
+  {% endif %}
+{% endif %}
+{% endblock %}
