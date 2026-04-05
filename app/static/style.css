@@ -1,0 +1,365 @@
+/* ─── Design Tokens ───────────────────────────────────────────── */
+:root {
+  --bg:            #faf6ef;
+  --surface:       #fffdf7;
+  --border:        #dfc99a;
+  --border-light:  #eeddb5;
+  --text:          #2b1800;
+  --text-muted:    #7a5c38;
+  --accent:        #7a3b1e;
+  --accent-dark:   #561f08;
+  --accent-light:  #a0522d;
+  --cream:         #fdf6e3;
+
+  --font-serif:    'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body:     'Lora', Georgia, 'Times New Roman', serif;
+
+  --radius:        4px;
+  --max-width:     860px;
+  --max-prose:     68ch;
+}
+
+/* ─── Reset & Base ────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* subtle paper texture via repeating gradient */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(223, 201, 154, 0.08) 28px,
+      rgba(223, 201, 154, 0.08) 29px
+    );
+}
+
+/* ─── Header ──────────────────────────────────────────────────── */
+header {
+  background-color: var(--accent);
+  background-image: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 60%, var(--accent-light) 100%);
+  color: var(--cream);
+  text-align: center;
+  padding: 2.25rem 1.5rem 2rem;
+  border-bottom: 5px solid var(--accent-dark);
+  box-shadow: 0 4px 16px rgba(43, 24, 0, 0.25);
+  position: relative;
+}
+
+header::after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: -9px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--border) 0px,
+    var(--border) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.site-brand__text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--cream);
+  text-shadow: 1px 2px 6px rgba(0,0,0,0.3);
+}
+
+.site-brand__ornament {
+  font-size: 1.2rem;
+  opacity: 0.6;
+  color: var(--border);
+}
+
+.site-brand__tagline {
+  margin-top: 0.35rem;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: rgba(253, 246, 227, 0.75);
+  letter-spacing: 0.03em;
+}
+
+/* ─── Main ────────────────────────────────────────────────────── */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 3.5rem 1.75rem 4rem;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────── */
+footer {
+  background-color: var(--accent);
+  background-image: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  color: rgba(253, 246, 227, 0.75);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  font-style: italic;
+  border-top: 4px solid var(--accent-dark);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.footer-ornament {
+  opacity: 0.45;
+  font-size: 1rem;
+}
+
+/* ─── Shared Ornament Divider ─────────────────────────────────── */
+.ornament-divider {
+  text-align: center;
+  margin: 1rem 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+}
+
+/* ─── Page Intro (index hero) ─────────────────────────────────── */
+.page-intro {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.page-intro h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+}
+
+.page-intro > p {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 1.05rem;
+  margin-top: 0.5rem;
+}
+
+/* ─── Story Cards ─────────────────────────────────────────────── */
+.stories-grid {
+  display: grid;
+  gap: 2rem;
+}
+
+.story-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 2rem 2.25rem;
+  box-shadow: 0 2px 8px rgba(43, 24, 0, 0.06);
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-left-color 0.2s ease;
+  position: relative;
+}
+
+.story-card:hover {
+  box-shadow: 0 6px 24px rgba(122, 59, 30, 0.16);
+  transform: translateY(-3px);
+  border-left-color: var(--accent-dark);
+}
+
+.story-card__meta {
+  margin-bottom: 0.4rem;
+}
+
+.story-card__wordcount {
+  font-size: 0.78rem;
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.story-card__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.25;
+  margin-bottom: 0.85rem;
+}
+
+.story-card__preview {
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.75;
+  margin-bottom: 1.25rem;
+  font-size: 0.975rem;
+}
+
+/* ─── Read Link ───────────────────────────────────────────────── */
+.read-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.read-link:hover {
+  color: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+.read-link__arrow {
+  transition: transform 0.2s;
+}
+
+.read-link:hover .read-link__arrow {
+  transform: translateX(4px);
+}
+
+/* ─── Story Page ──────────────────────────────────────────────── */
+.story-page {
+  max-width: var(--max-prose);
+  margin: 0 auto;
+}
+
+.story-page__header {
+  margin-bottom: 2.5rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s;
+  border-bottom: 1px solid transparent;
+}
+
+.back-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--border-light);
+}
+
+.story-page__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+}
+
+.story-page__meta {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+/* ─── Story Body ──────────────────────────────────────────────── */
+.story-content {
+  margin-top: 2.5rem;
+}
+
+.story-content p {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  line-height: 1.95;
+  color: var(--text);
+  margin-bottom: 1.6em;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.story-content p:first-child::first-letter {
+  font-family: var(--font-serif);
+  font-size: 3.8em;
+  font-weight: 700;
+  float: left;
+  line-height: 0.78;
+  margin: 0.08em 0.1em -0.02em 0;
+  color: var(--accent);
+}
+
+/* ─── Story Footer ────────────────────────────────────────────── */
+.story-page__footer {
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+/* ─── Empty State ─────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 3rem 0;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  main {
+    padding: 2rem 1.1rem 3rem;
+  }
+
+  .story-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .story-content p:first-child::first-letter {
+    font-size: 3em;
+  }
+}

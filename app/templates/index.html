@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Ted &amp; Linda's Stories — Home{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+  <h1>Stories from the Heart</h1>
+  <div class="ornament-divider"><span>&mdash;&nbsp;&loz;&nbsp;&mdash;</span></div>
+  <p>Real moments, real memories &mdash; told in Ted &amp; Linda's own words.</p>
+</section>
+
+{% if stories %}
+<div class="stories-grid">
+  {% for s in stories %}
+  <article class="story-card">
+    <div class="story-card__meta">
+      <span class="story-card__wordcount">{{ s.word_count }} words</span>
+    </div>
+    <h2 class="story-card__title">{{ s.title }}</h2>
+    {% if s.preview %}
+    <p class="story-card__preview">{{ s.preview }}</p>
+    {% endif %}
+    <a href="{{ url_for('story', slug=s.slug) }}" class="read-link">
+      Read the story <span class="read-link__arrow">&rarr;</span>
+    </a>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty-state">No stories yet &mdash; check back soon.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Story Not Found — Ted &amp; Linda's Stories{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+  <h1>Story Not Found</h1>
+  <div class="ornament-divider"><span>&mdash;&nbsp;&loz;&nbsp;&mdash;</span></div>
+  <p>That story seems to have wandered off. Perhaps it's out on an adventure.</p>
+  <br />
+  <a href="{{ url_for('index') }}" class="read-link">
+    &larr; Return to all stories
+  </a>
+</section>
+{% endblock %}
