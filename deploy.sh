@@ -69,7 +69,7 @@ printf '%s\n' \
   '' \
   '[Container]' \
   "Image=localhost/$CONTAINER_NAME:latest" \
-  "PublishPort=$PORT:8080" \
+  'PublishPort=127.0.0.1:8080:8080' \
   "Volume=$REMOTE_DIR/stories:/stories:Z" \
   "EnvironmentFile=/etc/containers/systemd/$CONTAINER_NAME.env" \
   '' \
