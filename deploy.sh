@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# deploy.sh — Build image on server, restart the container.
+# deploy.sh — Build image on server, install/restart via Quadlet systemd unit.
 # Usage: ./deploy.sh
 set -euo pipefail
 
@@ -34,55 +34,76 @@ rsync -az --progress \
   --exclude='*.tar.gz' \
   ./ "$SERVER:$REMOTE_DIR/"
 
-# ── Build & restart on server ──────────────────────────────────
+# ── Seed stories dir on first deploy (--ignore-existing protects uploads) ──
+echo "==> Seeding stories (skips any already on server)..."
+rsync -az --ignore-existing stories/ "$SERVER:$REMOTE_DIR/stories/"
+
+# ── Build & install on server ──────────────────────────────────
 echo ""
-echo "==> Building and restarting container on server..."
+echo "==> Building image and installing Quadlet service on server..."
 ssh "$SERVER" bash <<REMOTE
 set -euo pipefail
 cd "$REMOTE_DIR"
 
+echo "--- Ensuring stories directory exists with correct ownership ---"
+mkdir -p "$REMOTE_DIR/stories"
+chown -R 1001:1001 "$REMOTE_DIR/stories"
+
 echo "--- Building image ---"
 podman build --network=host -t "$CONTAINER_NAME:latest" .
 
-echo "--- Stopping existing container (if any) ---"
-podman stop "$CONTAINER_NAME" 2>/dev/null && echo "Stopped." || echo "Not running."
-podman rm   "$CONTAINER_NAME" 2>/dev/null && echo "Removed." || echo "Not found."
+echo "--- Writing container env file (root-only, not baked into image) ---"
+mkdir -p /etc/containers/systemd
+printf 'SECRET_KEY=%s\nADMIN_PASSWORD=%s\n' "$SECRET_KEY" "$ADMIN_PASSWORD" \
+  > /etc/containers/systemd/$CONTAINER_NAME.env
+chmod 600 /etc/containers/systemd/$CONTAINER_NAME.env
 
-echo "--- Fixing stories directory ownership (appuser uid 1001) ---"
-chown -R 1001:1001 "$REMOTE_DIR/stories"
+echo "--- Writing Quadlet .container unit ---"
+# Quadlet processes this after 'systemctl daemon-reload' and creates a
+# managed service that auto-starts on boot with the volume mount intact.
+printf '%s\n' \
+  '[Unit]' \
+  'Description=Ted and Linda Stories web app' \
+  'After=network-online.target' \
+  'Wants=network-online.target' \
+  '' \
+  '[Container]' \
+  "Image=localhost/$CONTAINER_NAME:latest" \
+  "PublishPort=$PORT:8080" \
+  "Volume=$REMOTE_DIR/stories:/stories:Z" \
+  "EnvironmentFile=/etc/containers/systemd/$CONTAINER_NAME.env" \
+  '' \
+  '[Service]' \
+  'Restart=always' \
+  'TimeoutStartSec=60' \
+  '' \
+  '[Install]' \
+  'WantedBy=multi-user.target default.target' \
+  > /etc/containers/systemd/$CONTAINER_NAME.container
 
-echo "--- Starting container ---"
-# Stories are mounted as a volume so uploads survive restarts/rebuilds
-podman run -d \
-  --name "$CONTAINER_NAME" \
-  --restart=always \
-  -p "$PORT":8080 \
-  -v "$REMOTE_DIR/stories":/stories:Z \
-  -e SECRET_KEY="$SECRET_KEY" \
-  -e ADMIN_PASSWORD="$ADMIN_PASSWORD" \
-  "$CONTAINER_NAME:latest"
+echo "--- Stopping any existing container (pre-Quadlet or stale) ---"
+podman stop "$CONTAINER_NAME"         2>/dev/null && echo "Stopped." || echo "Not running."
+podman rm   "$CONTAINER_NAME"         2>/dev/null && echo "Removed." || echo "Not found."
+podman stop "systemd-$CONTAINER_NAME" 2>/dev/null || true
+podman rm   "systemd-$CONTAINER_NAME" 2>/dev/null || true
+
+echo "--- Reloading systemd (picks up Quadlet unit) ---"
+systemctl daemon-reload
+
+echo "--- Starting / restarting service ---"
+if systemctl is-active --quiet "$CONTAINER_NAME" 2>/dev/null; then
+  systemctl restart "$CONTAINER_NAME"
+  echo "Service restarted."
+else
+  systemctl enable --now "$CONTAINER_NAME"
+  echo "Service enabled and started."
+fi
 
 echo ""
 echo "--- Container status ---"
-podman ps --filter "name=$CONTAINER_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
-# ── Generate & install systemd unit for auto-start on reboot ──
-echo ""
-echo "--- Installing systemd service ---"
-podman generate systemd \
-  --name "$CONTAINER_NAME" \
-  --restart-policy=always \
-  --files \
-  --new
-
-UNIT_FILE="container-${CONTAINER_NAME}.service"
-if [[ -f "\$UNIT_FILE" ]]; then
-  mv "\$UNIT_FILE" /etc/systemd/system/
-  systemctl daemon-reload
-  systemctl enable "$CONTAINER_NAME" 2>/dev/null || \
-    systemctl enable "container-$CONTAINER_NAME" 2>/dev/null || true
-  echo "Systemd service enabled."
-fi
+podman ps --filter "name=systemd-$CONTAINER_NAME" \
+  --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || \
+  podman ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 REMOTE
 
 echo ""
