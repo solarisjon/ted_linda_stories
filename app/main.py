@@ -143,6 +143,44 @@ def admin_upload():
     )
 
 
+@app.route("/admin/edit/<slug>", methods=["GET", "POST"])
+@login_required
+def admin_edit(slug):
+    if not safe_slug(slug):
+        abort(400)
+    path = STORIES_DIR / slug
+    if not path.exists() or not path.is_file():
+        abort(404)
+
+    error = None
+
+    if request.method == "POST":
+        title   = request.form.get("title", "").strip()
+        content = request.form.get("content", "").strip()
+        if not title:
+            error = "A title is required."
+        elif not content:
+            error = "Story content cannot be empty."
+        else:
+            new_slug = title_to_slug(title)
+            new_path = STORIES_DIR / new_slug
+            # If slug changed, make sure the new name isn't taken
+            if new_slug != slug and new_path.exists():
+                error = f'Another story already uses that title (file: {new_slug}).'
+            else:
+                new_path.write_text(f"{title}\n{content}\n", encoding="utf-8")
+                if new_slug != slug:
+                    path.unlink()
+                return redirect(url_for("admin_upload"))
+
+    # Read raw content (preserve original line structure for the textarea)
+    raw = path.read_text(encoding="utf-8").strip().split("\n", 1)
+    title   = raw[0].strip()
+    content = raw[1].strip() if len(raw) > 1 else ""
+
+    return render_template("admin_edit.html", slug=slug, title=title, content=content, error=error)
+
+
 # ── Error handlers ─────────────────────────────────────────────────
 
 @app.errorhandler(404)

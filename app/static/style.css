@@ -630,6 +630,17 @@ main {
   background: var(--border-light);
 }
 
+.admin-btn--edit {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.admin-btn--edit:hover {
+  background: var(--border-light);
+  color: var(--accent);
+}
+
 .admin-btn--delete {
   background: transparent;
   border-color: #d9b0aa;
@@ -638,6 +649,26 @@ main {
 
 .admin-btn--delete:hover {
   background: #fdf0ee;
+}
+
+.admin-form__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.admin-form__cancel {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-light);
+  transition: color 0.2s;
+}
+
+.admin-form__cancel:hover {
+  color: var(--accent);
 }
 
 /* ─── Responsive ──────────────────────────────────────────────── */

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Edit: {{ title }} — Ted &amp; Linda's Stories{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+
+  <div class="admin-header">
+    <h1 class="admin-header__title">Edit Story</h1>
+    <a href="{{ url_for('admin_upload') }}" class="admin-logout">&larr; Back to manager</a>
+  </div>
+
+  <div class="ornament-divider"><span>&mdash;&nbsp;&loz;&nbsp;&mdash;</span></div>
+
+  <section class="admin-section">
+
+    {% if error %}
+    <p class="admin-error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" class="admin-form">
+
+      <label class="admin-form__label" for="title">Title</label>
+      <input
+        class="admin-form__input"
+        type="text"
+        id="title"
+        name="title"
+        value="{{ title }}"
+        required
+        autofocus
+      />
+
+      <label class="admin-form__label" for="content">Story</label>
+      <p class="admin-form__hint">
+        Each line is a paragraph. Changing the title will rename the story file.
+      </p>
+      <textarea
+        class="admin-form__textarea"
+        id="content"
+        name="content"
+        rows="20"
+        required
+      >{{ content }}</textarea>
+
+      <div class="admin-form__actions">
+        <button class="admin-form__submit" type="submit">Save Changes</button>
+        <a href="{{ url_for('admin_upload') }}" class="admin-form__cancel">Cancel</a>
+      </div>
+    </form>
+  </section>
+
+</div>
+{% endblock %}
