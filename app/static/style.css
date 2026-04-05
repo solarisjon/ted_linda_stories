@@ -121,7 +121,7 @@ main {
 }
 
 /* ─── Footer ──────────────────────────────────────────────────── */
-footer {
+.site-footer {
   background-color: var(--accent);
   background-image: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
   color: rgba(253, 246, 227, 0.75);
@@ -264,22 +264,30 @@ footer {
   margin: 0 auto;
 }
 
+/* Dark gradient box — story header */
 .story-page__header {
-  margin-bottom: 2.5rem;
+  background-color: var(--accent);
+  background-image: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 60%, var(--accent-light) 100%);
+  border-radius: var(--radius);
+  border-bottom: 4px solid var(--accent-dark);
+  box-shadow: 0 4px 16px rgba(43, 24, 0, 0.25);
+  padding: 2rem 2.25rem 2rem;
+  margin-bottom: 3rem;
 }
 
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: var(--text-muted);
   text-decoration: none;
   font-size: 0.88rem;
   font-family: var(--font-body);
   letter-spacing: 0.02em;
-  margin-bottom: 1.5rem;
-  transition: color 0.2s;
+  margin-bottom: 1.25rem;
+  transition: color 0.2s, border-color 0.2s;
   border-bottom: 1px solid transparent;
+  /* default (light bg) */
+  color: var(--text-muted);
 }
 
 .back-link:hover {
@@ -287,22 +295,43 @@ footer {
   border-bottom-color: var(--border-light);
 }
 
+/* override back-link inside dark boxes */
+.story-page__header .back-link,
+.story-page__footer .back-link {
+  color: rgba(253, 246, 227, 0.8);
+  border-bottom-color: rgba(253, 246, 227, 0.2);
+}
+
+.story-page__header .back-link:hover,
+.story-page__footer .back-link:hover {
+  color: var(--cream);
+  border-bottom-color: rgba(253, 246, 227, 0.6);
+}
+
 .story-page__title {
   font-family: var(--font-serif);
   font-size: clamp(1.9rem, 5vw, 3rem);
   font-weight: 700;
-  color: var(--accent);
   line-height: 1.15;
   margin-bottom: 0.5rem;
+  color: var(--cream);
+  text-shadow: 1px 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .story-page__meta {
   font-size: 0.8rem;
   font-style: italic;
-  color: var(--text-muted);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-top: 0.25rem;
+  color: rgba(253, 246, 227, 0.65);
+}
+
+/* ornament inside dark boxes */
+.story-page__header .ornament-divider,
+.story-page__footer .ornament-divider {
+  color: rgba(253, 246, 227, 0.5);
+  opacity: 1;
 }
 
 /* ─── Story Body ──────────────────────────────────────────────── */
@@ -330,15 +359,19 @@ footer {
   color: var(--accent);
 }
 
-/* ─── Story Footer ────────────────────────────────────────────── */
+/* ─── Story Footer — dark gradient box ───────────────────────── */
 .story-page__footer {
   margin-top: 3.5rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-light);
+  background-color: var(--accent);
+  background-image: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 60%, var(--accent-light) 100%);
+  border-radius: var(--radius);
+  border-top: 4px solid var(--accent-dark);
+  box-shadow: 0 4px 16px rgba(43, 24, 0, 0.25);
+  padding: 1.75rem 2.25rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 /* ─── Empty State ─────────────────────────────────────────────── */
