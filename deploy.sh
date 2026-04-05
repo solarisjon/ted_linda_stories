@@ -15,6 +15,8 @@ SERVER="${SERVER:?SERVER must be set in .env}"
 REMOTE_DIR="${REMOTE_DIR:-/opt/ted-linda-stories}"
 CONTAINER_NAME="${CONTAINER_NAME:-ted-linda-stories}"
 PORT="${PORT:-80}"
+SECRET_KEY="${SECRET_KEY:?SECRET_KEY must be set in .env}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in .env}"
 
 echo "==> Deploying Ted & Linda's Stories"
 echo "    Target      : $SERVER"
@@ -47,10 +49,14 @@ podman stop "$CONTAINER_NAME" 2>/dev/null && echo "Stopped." || echo "Not runnin
 podman rm   "$CONTAINER_NAME" 2>/dev/null && echo "Removed." || echo "Not found."
 
 echo "--- Starting container ---"
+# Stories are mounted as a volume so uploads survive restarts/rebuilds
 podman run -d \
   --name "$CONTAINER_NAME" \
   --restart=always \
   -p "$PORT":8080 \
+  -v "$REMOTE_DIR/stories":/stories:Z \
+  -e SECRET_KEY="$SECRET_KEY" \
+  -e ADMIN_PASSWORD="$ADMIN_PASSWORD" \
   "$CONTAINER_NAME:latest"
 
 echo ""

@@ -1,37 +1,70 @@
 import os
+import re
+import secrets
+from functools import wraps
 from pathlib import Path
-from flask import Flask, render_template, abort
+
+from flask import (
+    Flask, render_template, abort,
+    request, redirect, url_for, session,
+)
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-insecure-key-change-me")
 
-STORIES_DIR = Path(os.environ.get("STORIES_DIR", "/stories"))
+STORIES_DIR   = Path(os.environ.get("STORIES_DIR", "/stories"))
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
+
+# ── Helpers ────────────────────────────────────────────────────────
 
 def parse_story(path: Path) -> dict:
-    text = path.read_text(encoding="utf-8").strip()
+    text  = path.read_text(encoding="utf-8").strip()
     lines = text.split("\n")
     title = lines[0].strip() if lines else path.stem.replace("-", " ").replace("_", " ").title()
     paragraphs = [ln.strip() for ln in lines[1:] if ln.strip()]
     word_count = sum(len(p.split()) for p in paragraphs)
-    preview = paragraphs[0][:200].rsplit(" ", 1)[0] + "\u2026" if paragraphs else ""
+    preview    = paragraphs[0][:200].rsplit(" ", 1)[0] + "\u2026" if paragraphs else ""
     return {
-        "slug": path.name,
-        "title": title,
+        "slug":       path.name,
+        "title":      title,
         "paragraphs": paragraphs,
         "word_count": word_count,
-        "preview": preview,
+        "preview":    preview,
     }
 
 
 def get_stories() -> list[dict]:
     if not STORIES_DIR.exists():
         return []
-    stories = []
-    for p in sorted(STORIES_DIR.iterdir()):
-        if p.is_file() and not p.name.startswith("."):
-            stories.append(parse_story(p))
-    return stories
+    return [
+        parse_story(p)
+        for p in sorted(STORIES_DIR.iterdir())
+        if p.is_file() and not p.name.startswith(".")
+    ]
 
+
+def title_to_slug(title: str) -> str:
+    slug = title.lower().strip()
+    slug = re.sub(r"[^\w\s-]", "", slug)
+    slug = re.sub(r"[\s_]+", "_", slug)
+    return slug.strip("_-") or "story"
+
+
+def safe_slug(slug: str) -> bool:
+    return bool(slug) and "/" not in slug and "\\" not in slug and not slug.startswith(".")
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("authenticated"):
+            return redirect(url_for("admin_login", next=request.path))
+        return f(*args, **kwargs)
+    return decorated
+
+
+# ── Public routes ──────────────────────────────────────────────────
 
 @app.route("/")
 def index():
@@ -40,14 +73,77 @@ def index():
 
 @app.route("/story/<slug>")
 def story(slug):
-    # Prevent path traversal
-    if "/" in slug or "\\" in slug or slug.startswith("."):
+    if not safe_slug(slug):
         abort(400)
     path = STORIES_DIR / slug
     if not path.exists() or not path.is_file():
         abort(404)
     return render_template("story.html", story=parse_story(path))
 
+
+# ── Admin routes ───────────────────────────────────────────────────
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    error = None
+    if request.method == "POST":
+        pw = request.form.get("password", "")
+        if ADMIN_PASSWORD and secrets.compare_digest(pw, ADMIN_PASSWORD):
+            session["authenticated"] = True
+            return redirect(request.args.get("next") or url_for("admin_upload"))
+        error = "Incorrect password."
+    return render_template("admin_login.html", error=error)
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.clear()
+    return redirect(url_for("index"))
+
+
+@app.route("/admin/upload", methods=["GET", "POST"])
+@login_required
+def admin_upload():
+    error = success = None
+
+    if request.method == "POST":
+        action = request.form.get("action", "upload")
+
+        if action == "upload":
+            title   = request.form.get("title", "").strip()
+            content = request.form.get("content", "").strip()
+            if not title:
+                error = "A title is required."
+            elif not content:
+                error = "Story content cannot be empty."
+            else:
+                slug = title_to_slug(title)
+                path = STORIES_DIR / slug
+                if path.exists():
+                    error = f'A story with that title already exists (file: {slug}).'
+                else:
+                    STORIES_DIR.mkdir(parents=True, exist_ok=True)
+                    path.write_text(f"{title}\n{content}\n", encoding="utf-8")
+                    success = f'"{title}" has been published!'
+
+        elif action == "delete":
+            slug = request.form.get("slug", "")
+            if not safe_slug(slug):
+                abort(400)
+            path = STORIES_DIR / slug
+            if path.exists() and path.is_file():
+                path.unlink()
+            return redirect(url_for("admin_upload"))
+
+    return render_template(
+        "admin_upload.html",
+        stories=get_stories(),
+        error=error,
+        success=success,
+    )
+
+
+# ── Error handlers ─────────────────────────────────────────────────
 
 @app.errorhandler(404)
 def not_found(_e):

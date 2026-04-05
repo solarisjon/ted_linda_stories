@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login — Ted &amp; Linda's Stories{% endblock %}
+
+{% block content %}
+<div class="admin-login">
+  <div class="admin-login__box">
+    <h1 class="admin-login__title">Admin Access</h1>
+    <div class="ornament-divider"><span>&mdash;&nbsp;&loz;&nbsp;&mdash;</span></div>
+    <p class="admin-login__sub">Enter the password to manage stories.</p>
+
+    {% if error %}
+    <p class="admin-error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" class="admin-form">
+      <label class="admin-form__label" for="password">Password</label>
+      <input
+        class="admin-form__input"
+        type="password"
+        id="password"
+        name="password"
+        autocomplete="current-password"
+        autofocus
+        required
+      />
+      <button class="admin-form__submit" type="submit">Sign In</button>
+    </form>
+
+    <a href="{{ url_for('index') }}" class="admin-back">&larr; Back to stories</a>
+  </div>
+</div>
+{% endblock %}
