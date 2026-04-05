@@ -5,7 +5,7 @@
   --border:        #dfc99a;
   --border-light:  #eeddb5;
   --text:          #2b1800;
-  --text-muted:    #7a5c38;
+  --text-muted:    #4a3010;
   --accent:        #7a3b1e;
   --accent-dark:   #561f08;
   --accent-light:  #a0522d;
@@ -222,7 +222,7 @@ footer {
 }
 
 .story-card__preview {
-  color: var(--text-muted);
+  color: var(--text);
   font-style: italic;
   line-height: 1.75;
   margin-bottom: 1.25rem;
