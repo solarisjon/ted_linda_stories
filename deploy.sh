@@ -48,6 +48,9 @@ echo "--- Stopping existing container (if any) ---"
 podman stop "$CONTAINER_NAME" 2>/dev/null && echo "Stopped." || echo "Not running."
 podman rm   "$CONTAINER_NAME" 2>/dev/null && echo "Removed." || echo "Not found."
 
+echo "--- Fixing stories directory ownership (appuser uid 1001) ---"
+chown -R 1001:1001 "$REMOTE_DIR/stories"
+
 echo "--- Starting container ---"
 # Stories are mounted as a volume so uploads survive restarts/rebuilds
 podman run -d \
