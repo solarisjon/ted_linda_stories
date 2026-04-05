@@ -4,14 +4,14 @@
 
 {% block content %}
 <article class="story-page">
-  <header class="story-page__header">
+  <div class="story-page__header">
     <a href="{{ url_for('index') }}" class="back-link">
       <span>&larr;</span> All Stories
     </a>
     <h1 class="story-page__title">{{ story.title }}</h1>
     <div class="ornament-divider"><span>&mdash;&nbsp;&loz;&nbsp;&mdash;</span></div>
     <p class="story-page__meta">{{ story.word_count }} words</p>
-  </header>
+  </div>
 
   <div class="story-content">
     {% for paragraph in story.paragraphs %}
