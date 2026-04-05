@@ -91,12 +91,14 @@ echo "--- Reloading systemd (picks up Quadlet unit) ---"
 systemctl daemon-reload
 
 echo "--- Starting / restarting service ---"
+# Quadlet units are generated (not installed), so use start/restart not enable.
+# The generator ensures auto-start on boot via WantedBy in the .container file.
 if systemctl is-active --quiet "$CONTAINER_NAME" 2>/dev/null; then
   systemctl restart "$CONTAINER_NAME"
   echo "Service restarted."
 else
-  systemctl enable --now "$CONTAINER_NAME"
-  echo "Service enabled and started."
+  systemctl start "$CONTAINER_NAME"
+  echo "Service started."
 fi
 
 echo ""
