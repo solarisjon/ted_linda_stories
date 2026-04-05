@@ -40,7 +40,7 @@ set -euo pipefail
 cd "$REMOTE_DIR"
 
 echo "--- Building image ---"
-podman build -t "$CONTAINER_NAME:latest" .
+podman build --network=host -t "$CONTAINER_NAME:latest" .
 
 echo "--- Stopping existing container (if any) ---"
 podman stop "$CONTAINER_NAME" 2>/dev/null && echo "Stopped." || echo "Not running."
